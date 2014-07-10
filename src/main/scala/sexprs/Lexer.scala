@@ -3,21 +3,12 @@ package sexprs
 import Tokens._
 
 /*
- * Note that in theory this should be a complete s-expression parser/lexer, following
- * standard of common lisp. In practice, it is not complete but should supports
- * s-expression as used in SMT-lib (which is a subset of legal s-expression).
- *
- * However, S-expression lacking an actual standard, it is very difficult to make 
- * it a standalone package. So we will just make it work for SMT-LIB.
- *
- * The Lexer provides an interface with a next and hasNext.
- * The next function returns the * next available token or throw a runtime exception if
- * the EOF is reached (should call hasNext before invoking next).
- * It throws some self explicit exceptions to indicate an issue with the syntax of the input.
+ * The Lexer reads a plain text input and tokenize it into a sequence of
+ * tokens.
  *
  * The tokens are positioned: the line/column numerotation starts at 1-1.
  */
-class Lexer(reader: java.io.Reader) extends Iterator[Token] {
+class Lexer(reader: java.io.Reader) {
 
   import Lexer._
 
@@ -44,7 +35,7 @@ class Lexer(reader: java.io.Reader) extends Iterator[Token] {
   private def nextChar: Char = {
     _futureChar match {
       case Some(i) => {
-        if(_futureChar == -1)
+        if(i == -1)
           throw new UnexpectedEOFException(Position(_currentLine, _currentCol))
         _currentChar = i
         _futureChar = None
@@ -86,14 +77,11 @@ class Lexer(reader: java.io.Reader) extends Iterator[Token] {
     }
   }
 
-  override def hasNext: Boolean = peek != -1
-
   /* 
-   * Return the next token if there is one, or throw NoSuchElementException.
+   * Return the next token if there is one, or null if EOF.
+   * Throws a range of different Exceptions for unexpected events.
    */
-  override def next: Token = if(peek == -1) {
-    throw new NoSuchElementException
-  } else {
+  def nextToken: Token = if(peek == -1) null else {
 
     var c: Char = nextChar
     while(isBlank(c)) {
@@ -108,7 +96,7 @@ class Lexer(reader: java.io.Reader) extends Iterator[Token] {
       case ';' => {
         while(!isNewLine(nextChar))
           ()
-        next
+        nextToken
       }
       case '(' => OParen()
       case ')' => CParen()

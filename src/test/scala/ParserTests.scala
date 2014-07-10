@@ -1,7 +1,5 @@
-package smtlib
-package sexpr
+package sexprs
 
-import common._
 import SExprs._
 
 import java.io.StringReader
@@ -20,7 +18,7 @@ class ParserTests extends FunSuite with Timeouts {
     """)
     val lexer1 = new Lexer(reader1)
     val parser1 = new Parser(lexer1)
-    assert(parser1.next === SList(List(SSymbol("test"), SString("test"))))
+    assert(parser1.parse === SList(List(SSymbol("test"), SString("test"))))
 
 
     val reader2 = new StringReader("""
@@ -28,14 +26,14 @@ class ParserTests extends FunSuite with Timeouts {
     """)
     val lexer2 = new Lexer(reader2)
     val parser2 = new Parser(lexer2)
-    assert(parser2.next === SList(List(SInt(42), SDouble(42.173))))
+    assert(parser2.parse === SList(List(SInt(42), SDouble(42.173))))
 
     val reader3 = new StringReader("""
       (  42  ("test1" 21))
     """)
     val lexer3 = new Lexer(reader3)
     val parser3 = new Parser(lexer3)
-    assert(parser3.next === SList(List(
+    assert(parser3.parse === SList(List(
       SInt(42), 
       SList(List(SString("test1"),SInt(21))))))
 
@@ -44,7 +42,7 @@ class ParserTests extends FunSuite with Timeouts {
     """)
     val lexer4 = new Lexer(reader4)
     val parser4 = new Parser(lexer4)
-    assert(parser4.next === SList(List()))
+    assert(parser4.parse === SList(List()))
   }
 
   test("packages") {
@@ -53,7 +51,7 @@ class ParserTests extends FunSuite with Timeouts {
     """)
     val lexer1 = new Lexer(reader1)
     val parser1 = new Parser(lexer1)
-    assert(parser1.next === SList(List(SQualifiedSymbol(None, SSymbol("test")), SString("test"))))
+    assert(parser1.parse === SList(List(SQualifiedSymbol(None, SSymbol("test")), SString("test"))))
 
 
     val reader2 = new StringReader("""
@@ -61,7 +59,7 @@ class ParserTests extends FunSuite with Timeouts {
     """)
     val lexer2 = new Lexer(reader2)
     val parser2 = new Parser(lexer2)
-    assert(parser2.next === 
+    assert(parser2.parse === 
            SList(List(
              SQualifiedSymbol(Some(SSymbol("foo")), SSymbol("bar")),
              SQualifiedSymbol(None, SSymbol("toto")))))
@@ -74,11 +72,11 @@ class ParserTests extends FunSuite with Timeouts {
     val parser = new Parser(lexer)
 
     pis.write("(test 12)")
-    assert(parser.next ===
+    assert(parser.parse ===
       SList(List(SSymbol("test"), SInt(12))))
 
     pis.write("(+ 1 3)")
-    assert(parser.next ===
+    assert(parser.parse ===
       SList(List(SSymbol("+"), SInt(1), SInt(3))))
   }
 

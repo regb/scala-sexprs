@@ -1,5 +1,4 @@
-package smtlib
-package common
+package sexprs
 
 import java.io.Reader
 import scala.collection.mutable.ArrayBuffer

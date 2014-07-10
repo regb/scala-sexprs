@@ -1,4 +1,4 @@
-package smtlib.sexpr
+package sexprs
 
 import SExprs._
 import java.io.StringReader
